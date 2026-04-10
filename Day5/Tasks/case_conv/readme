@@ -1,0 +1,15 @@
+1. The Offset Reset Problem
+In your basic_write, you update *offset. When a user program does a write() 
+followed immediately by a read() on the same file descriptor, the offset will 
+be at the end of the data you just wrote.
+In basic_read, you check if (*offset >= buffer_size). Since the offset is 
+already at the end, read will return 0 (EOF) immediately.
+The Fix:
+
+In your basic_write, reset the offset to 0 if you want the very next read to start 
+from the beginning of the converted string. Or, ensure your user-space program calls 
+lseek(fd, 0, SEEK_SET) before reading.
+2. buffer_size vs BUF_SIZE
+In basic_write, you use BUF_SIZE (the capacity), but in basic_read, you use a variable 
+called buffer_size. You need to update buffer_size during the write so the read knows 
+exactly how many bytes are actually valid.
