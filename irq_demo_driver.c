@@ -73,5 +73,5 @@ module_init(irq_demo_init);
 module_exit(irq_demo_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("mirafra");
+MODULE_AUTHOR("Ram");
 MODULE_DESCRIPTION("Simple Linux Kernel IRQ handling example");
