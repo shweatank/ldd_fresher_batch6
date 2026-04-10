@@ -46,6 +46,6 @@ module_init(kbd_driver_init);
 module_exit(kbd_driver_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("mirafra");
+MODULE_AUTHOR("Ram");
 MODULE_DESCRIPTION("Simple Keyboard Interrupt Driver");
 
