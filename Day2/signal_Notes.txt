@@ -1,0 +1,5 @@
+signal(SIGTSTP, signalhander): This "catches" the signal and runs your custom function, but the program continues running afterward.
+
+signal(SIGTSTP, SIG_IGN): This tells the kernel to discard the signal entirely. When you press Ctrl+Z, nothing will happen.
+
+signal(SIGTSTP, SIG_DFL): This restores the default behavior, which for SIGTSTP is to stop (suspend) the process.
