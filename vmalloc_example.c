@@ -58,6 +58,6 @@ module_init(mem_demo_init);
 module_exit(mem_demo_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("mirafra");
+MODULE_AUTHOR("Ram");
 MODULE_DESCRIPTION("kmalloc vs vmalloc example");
 
