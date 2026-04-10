@@ -143,6 +143,6 @@ module_init(basic_char_init);
 module_exit(basic_char_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("mirafra");
+MODULE_AUTHOR("Ram");
 MODULE_DESCRIPTION("Educational basics character driver with file operations");
 
