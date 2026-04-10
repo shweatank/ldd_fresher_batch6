@@ -1,0 +1,308 @@
+This is a **minimal Linux kernel IOCTL driver** that lets a user-space program send two integers + an operation → kernel computes → sends result back.
+
+Let’s go step by step in a simple flow 👇
+
+---
+
+# 🔹 1. What this program is doing (big picture)
+
+User space:
+➡ sends `{a, b, op}`
+Kernel:
+➡ receives it via `ioctl()`
+➡ performs calculation
+➡ writes result back
+➡ user reads updated struct
+
+---
+
+# 🔹 2. Header files
+
+```c
+#include<linux/module.h>
+#include<linux/fs.h>
+#include<linux/uaccess.h>
+#include<linux/ioctl.h>
+```
+
+* `module.h` → for kernel module macros
+* `fs.h` → file operations (`open`, `ioctl`, etc.)
+* `uaccess.h` → safe copy between user & kernel (`copy_from_user`)
+* `ioctl.h` → ioctl macros
+
+---
+
+# 🔹 3. Device & IOCTL definition
+
+```c
+#define DEVICE_NAME "basic_ioctl"
+#define IOCTL_MAGIC 'B'
+```
+
+* `DEVICE_NAME` → name of char device
+* `IOCTL_MAGIC` → unique identifier for your ioctl commands
+
+---
+
+# 🔹 4. Structure used for communication
+
+```c
+struct calc {
+    int a;
+    int b;
+    char op[10];
+    int result;
+};
+```
+
+This struct travels between:
+
+* user → kernel
+* kernel → user
+
+Example:
+
+```c
+{ a=10, b=5, op="add" }
+```
+
+---
+
+# 🔹 5. IOCTL command definition
+
+```c
+#define IOCTL_CALC _IOWR(IOCTL_MAGIC, 1, struct calc)
+```
+
+* `_IOWR` = **Read + Write**
+
+  * user writes data to kernel
+  * kernel writes result back
+
+Arguments:
+
+* `'B'` → magic number
+* `1` → command number
+* `struct calc` → data type
+
+---
+
+# 🔹 6. IOCTL handler function
+
+```c
+static long basic_ioctl(struct file *file,
+                       unsigned int cmd,
+                       unsigned long arg)
+```
+
+This is called when user runs:
+
+```c
+ioctl(fd, IOCTL_CALC, &calc_struct);
+```
+
+---
+
+# 🔹 7. Step-by-step inside ioctl()
+
+## ✅ Step 1: Create kernel copy
+
+```c
+struct calc c;
+```
+
+Kernel **cannot directly access user memory**, so we use a local variable.
+
+---
+
+## ✅ Step 2: Check command
+
+```c
+switch(cmd){
+   case IOCTL_CALC:
+```
+
+Ensures correct ioctl command.
+
+---
+
+## ✅ Step 3: Copy data from user → kernel
+
+```c
+copy_from_user(&c, (struct calc __user *)arg, sizeof(struct calc))
+```
+
+* `arg` = pointer from user space
+* copied into `c`
+
+If fails → return `-EFAULT`
+
+---
+
+## ✅ Step 4: Perform operation
+
+```c
+if(strcmp(c.op , "add")==0){
+    c.result = c.a + c.b;
+}
+```
+
+Supported operations:
+
+* `"add"` → addition
+* `"sub"` → subtraction
+* `"mul"` → multiplication
+* `"div"` → division (with zero check)
+
+⚠️ If divide by zero:
+
+```c
+pr_info("Can't Divide with Zero\n");
+```
+
+---
+
+## ✅ Step 5: Print in kernel log
+
+```c
+pr_info("Kernel: %d + %d = %d\n", c.a, c.b, c.result);
+```
+
+View using:
+
+```bash
+dmesg
+```
+
+---
+
+## ✅ Step 6: Copy result back to user
+
+```c
+copy_to_user((struct calc __user *)arg, &c, sizeof(struct calc))
+```
+
+Now user gets updated struct:
+
+```c
+{ a=10, b=5, op="add", result=15 }
+```
+
+---
+
+## ✅ Step 7: Return success
+
+```c
+return 0;
+```
+
+---
+
+# 🔹 8. File operations
+
+```c
+static struct file_operations fops = {
+   .owner = THIS_MODULE,
+   .unlocked_ioctl = basic_ioctl,
+};
+```
+
+* connects ioctl system call → `basic_ioctl()`
+
+---
+
+# 🔹 9. Module initialization
+
+```c
+static int __init basic_init(void)
+```
+
+### Register character device
+
+```c
+major = register_chrdev(0, DEVICE_NAME, &fops);
+```
+
+* `0` → kernel assigns major number automatically
+
+---
+
+### Print instructions
+
+```c
+mknod /dev/basic_ioctl c <major> 0
+```
+
+User must create device node manually.
+
+---
+
+# 🔹 10. Module exit
+
+```c
+unregister_chrdev(major, DEVICE_NAME);
+```
+
+Removes device when module is unloaded.
+
+---
+
+# 🔹 11. Full Flow (Important 🚀)
+
+### 🧑 User program:
+
+```c
+struct calc c = {10, 5, "add"};
+ioctl(fd, IOCTL_CALC, &c);
+printf("%d\n", c.result);
+```
+
+---
+
+### 🔁 Flow:
+
+1. User fills struct
+2. Calls `ioctl()`
+3. Kernel receives call → `basic_ioctl()`
+4. `copy_from_user()`
+5. Kernel computes result
+6. `copy_to_user()`
+7. User sees updated struct
+
+---
+
+# 🔹 12. Key Concepts (Very Important)
+
+### 🔸 Why copy functions?
+
+Kernel **cannot trust or directly access user memory**
+
+* `copy_from_user()` → safe read
+* `copy_to_user()` → safe write
+
+---
+
+### 🔸 Why IOCTL?
+
+Used when:
+
+* normal `read/write` not enough
+* need custom commands
+
+---
+
+### 🔸 Why `_IOWR`?
+
+Because:
+
+* user sends data → kernel (**Write**)
+* kernel returns data → user (**Read**)
+
+---
+
+# 🔹 13. Small Improvements (Good Practice)
+
+* Use `strncpy` safety checks
+* Validate `op` string length
+* Handle divide-by-zero better (return error)
+* Use `pr_err()` for errors
