@@ -1,0 +1,1 @@
+savedcmd_/home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/scancode/scan_code1.mod := printf '%s\n'   scan_code1.o | awk '!x[$$0]++ { print("/home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/scancode/"$$0) }' > /home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/scancode/scan_code1.mod

@@ -1,0 +1,1 @@
+savedcmd_/home/dell/mirafra/Training/ioctl/device_configuration/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/dell/mirafra/Training/ioctl/device_configuration/Module.symvers -T /home/dell/mirafra/Training/ioctl/device_configuration/modules.order -i Module.symvers -e 

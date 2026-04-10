@@ -1,0 +1,1 @@
+savedcmd_/home/dell/mirafra/Training/interrupts/int_tread/tread_intr.mod := printf '%s\n'   tread_intr.o | awk '!x[$$0]++ { print("/home/dell/mirafra/Training/interrupts/int_tread/"$$0) }' > /home/dell/mirafra/Training/interrupts/int_tread/tread_intr.mod
