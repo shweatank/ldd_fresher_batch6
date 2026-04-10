@@ -1,0 +1,50 @@
+static ssize_t basic_write(struct file *file, const char __user *user_buffer,
+                           size_t count, loff_t *offset)
+{
+    int a,b,sum;
+    size_t bytes_to_copy;
+
+    if (*offset >= BUF_SIZE)
+        return 0;
+
+    bytes_to_copy = min(count, (size_t)BUF_SIZE); //(size_t)(BUF_SIZE - 1)); // Leave room for \0
+
+    if (copy_from_user(kernal_buffer, user_buffer, bytes_to_copy))
+        return -EFAULT;
+    kernal_buffer[bytes_to_copy] = '\0';
+    //buffer_size = bytes_to_copy;
+    if(sscanf(kernal_buffer,"%d %d",&a,&b)==2){
+       sum = a+b;
+       printk(KERN_INFO "Addition Result: %d + %d = %d\n", a, b, sum);
+    }
+    else{
+       printk(KERN_ERR "Failed to parse integers from: %s\n", kernal_buffer);
+    }
+
+    return bytes_to_copy;
+}
+my input system call c code : include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <stdlib.h>
+int main(int argc, char *argv[]) {
+    if (argc < 4) {
+        printf("Usage: %s <num1> <num2> <operation>\n", argv[0]);
+        return 1;
+    }
+    int fd = open("/dev/add_char", O_RDWR);
+    if (fd < 0) {
+        perror("Failed to open device");
+        return 1;
+    }
+    char buf[100];
+    snprintf(buf, sizeof(buf), "%s %s %s", argv[1], argv[2], argv[3]);
+
+    if (write(fd, buf, strlen(buf)) < 0) {
+        perror("Failed to write to device");
+    }
+
+    close(fd);
+}
+i am take input as 1 2 add or 4 1 sub or 3 4 mul or 4 2 div 
