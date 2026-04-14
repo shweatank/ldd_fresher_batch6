@@ -1,1 +1,223 @@
+char *keymap[128] = {
+  [0x1E] = "A",
+  [0x30] = "B",
+  [0x2E] = "C",
+  [0x20] = "D",
+  [0x12] = "E",
+  [0x21] = "F",
+  [0x22] = "G",
+  [0x23] = "H",
+  [0x17] = "I",
+  [0x24] = "J",
+  [0x25] = "K",
+  [0x26] = "L",
+  [0x32] = "M",
+  [0x31] = "N",
+  [0x18] = "O",
+  [0x19] = "P",
+  [0x10] = "Q",
+  [0x13] = "R",
+  [0x1F] = "S",
+  [0x14] = "T",
+  [0x16] = "U",
+  [0x2F] = "V",
+  [0x11] = "W",
+  [0x2D] = "X",
+  [0x15] = "Y",
+  [0x2C] = "Z",
+};
+Great—you’re now seeing **real scan codes**, which is exactly what a low-level keyboard driver should produce 👍
+Now the key question is: **how do you map these scan codes to actual keys?**
+
+---
+
+# 🔑 1. What you are seeing
+
+Example from your log:
+
+```
+0x1c
+0x9c
+0xe0 0x48
+0xe0 0xc8
+```
+
+These are **Set 1 scan codes** (used by standard PC keyboards in Linux).
+
+---
+
+# 🧠 2. Basic Rules to Understand Scan Codes
+
+## ✅ Rule 1: Press vs Release
+
+| Type        | Rule                |
+| ----------- | ------------------- |
+| Key Press   | Normal code         |
+| Key Release | Press code + `0x80` |
+
+### Example:
+
+| Key   | Press  | Release |
+| ----- | ------ | ------- |
+| Enter | `0x1C` | `0x9C`  |
+| A     | `0x1E` | `0x9E`  |
+
+👉 From your log:
+
+```
+0x1c → Enter pressed
+0x9c → Enter released
+```
+
+---
+
+## ✅ Rule 2: Extended Keys (E0 prefix)
+
+When you see:
+
+```
+0xe0 0x48
+```
+
+👉 This means:
+
+* `0xE0` = **extended key prefix**
+* Next byte = actual key
+
+### Example:
+
+| Sequence | Meaning            |
+| -------- | ------------------ |
+| `E0 48`  | Up Arrow (press)   |
+| `E0 C8`  | Up Arrow (release) |
+
+👉 From your log:
+
+```
+0xe0 0x48 → Up Arrow pressed
+0xe0 0xc8 → Up Arrow released
+```
+
+---
+
+# 📘 3. Common Scan Code Table (Set 1)
+
+Here are some important ones:
+
+| Key   | Press | Release |
+| ----- | ----- | ------- |
+| ESC   | 0x01  | 0x81    |
+| 1     | 0x02  | 0x82    |
+| 2     | 0x03  | 0x83    |
+| 3     | 0x04  | 0x84    |
+| Q     | 0x10  | 0x90    |
+| W     | 0x11  | 0x91    |
+| E     | 0x12  | 0x92    |
+| A     | 0x1E  | 0x9E    |
+| S     | 0x1F  | 0x9F    |
+| D     | 0x20  | 0xA0    |
+| Enter | 0x1C  | 0x9C    |
+| Space | 0x39  | 0xB9    |
+| Ctrl  | 0x1D  | 0x9D    |
+
+---
+
+# 🔍 4. Decode YOUR Output
+
+Let’s interpret your log:
+
+```
+0x9c → Enter released
+0xe0 0x48 → Up Arrow pressed
+0xe0 0xc8 → Up Arrow released
+0x1c → Enter pressed
+0x9c → Enter released
+0x1d → Ctrl pressed
+0x2e → C pressed
+0xae → C released
+```
+
+👉 So you likely pressed:
+
+* Enter
+* Arrow keys
+* Ctrl + C
+
+---
+
+# 🧰 5. How to Automatically Map Scan Codes
+
+Instead of memorizing, you can create a lookup table in your driver.
+
+### Example:
+
+```c
+char *keymap[128] = {
+  [0x1E] = "A",
+  [0x30] = "B",
+  [0x2E] = "C",
+  [0x20] = "D",
+  [0x12] = "E",
+  [0x21] = "F",
+  [0x22] = "G",
+  [0x23] = "H",
+  [0x17] = "I",
+  [0x24] = "J",
+  [0x25] = "K",
+  [0x26] = "L",
+  [0x32] = "M",
+  [0x31] = "N",
+  [0x18] = "O",
+  [0x19] = "P",
+  [0x10] = "Q",
+  [0x13] = "R",
+  [0x1F] = "S",
+  [0x14] = "T",
+  [0x16] = "U",
+  [0x2F] = "V",
+  [0x11] = "W",
+  [0x2D] = "X",
+  [0x15] = "Y",
+  [0x2C] = "Z",
+};
+```
+
+---
+
+### Modify ISR:
+
+```c
+if (scancode < 128 && keymap[scancode])
+    printk(KERN_INFO "Key Pressed: %s\n", keymap[scancode]);
+```
+
+---
+
+# ⚡ 6. Handle Press Only (Ignore Release)
+
+```c
+if (!(scancode & 0x80)) {
+    printk("Key Pressed\n");
+}
+```
+
+✔ This filters out release events
+
+---
+
+# 🧩 7. Pro Tip
+
+Instead of hardcoding:
+
+* Use Linux file:
+
+```bash
+/lib/modules/.../drivers/input/
+```
+
+Or check:
+
+```bash
+showkey
+```
 
