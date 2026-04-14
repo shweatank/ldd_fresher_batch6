@@ -1,0 +1,9 @@
+# Ignore kernel module files
+*.ko
+*.mod
+*.mod.c
+*.mod.o	
+*.order
+*.o
+*.symvers
+modules.order
