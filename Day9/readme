@@ -1,1 +1,31 @@
+Problem 1: Addition Using Interrupt, Tasklet, and Thread Write a Linux kernel module 
+where:Interrupt reads two numbers
+Tasklet adds them Kernel thread prints the result
 
+Problem 2: Subtraction Operation Write a module where: Interrupt captures two numbers
+Tasklet performs subtraction Kernel thread displays the result
+
+Problem 3: Even or Odd Check
+Write a module where: Interrupt receives a number
+Tasklet checks whether it is even or odd Kernel thread prints the result
+
+Problem 4: Maximum of Two Numbers Write a module where:
+Interrupt reads two numbers Tasklet finds the maximum Kernel thread outputs the result
+
+Problem 5: Multiplication Task Write a module where:
+Interrupt collects two numbers Tasklet multiplies them Kernel thread prints the result
+
+Problem 6: Square of a Number
+Write a module where: Interrupt receives a number
+Tasklet calculates the square Kernel thread prints the result
+
+Problem 7: Counter Increment Write a module where:
+Interrupt increments a counter value Tasklet updates the counter
+Kernel thread prints the updated count
+
+Problem 8: Sum of Array Elements Write a module where: Interrupt 
+receives an array Tasklet calculates the sum Kernel thread displays the result
+
+Problem 9: Factorial Calculation Write a module where:
+Interrupt receives a number Tasklet calculates factorial (small number)
+Kernel thread prints the result
