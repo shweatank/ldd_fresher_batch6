@@ -1,0 +1,17 @@
+Design a Linux device driver that simulates a virtual device where a user-space application writes a request (e.g., “generate data”) to /dev/mydevice.
+The driver must:
+Simulate an interrupt (using a timer or software trigger) after receiving the request
+Handle the simulated interrupt in an ISR and defer work using a tasklet or workqueue
+Generate and store data inside the driver
+Put the user process to sleep using a waitqueue when it calls read() before data is ready
+Wake up the process once data is prepared
+Use a kernel thread to periodically generate or monitor data in the background
+
+////////////////////
+Deferred Logging System
+Create a driver for logging messages from user space.
+User writes log messages
+A software interrupt is triggered
+ISR defers work to a workqueue for formatting and storing logs
+A kernel thread periodically flushes logs
+read() waits using a waitqueue for new logs
