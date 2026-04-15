@@ -1,1 +1,0 @@
-./add_sysfs.o
