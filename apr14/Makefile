@@ -1,4 +1,4 @@
-obj-m +=timer_interrupt2.o
+obj-m +=waitq1.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
