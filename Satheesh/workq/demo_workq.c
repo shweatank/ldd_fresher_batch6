@@ -14,6 +14,7 @@ static void my_work_handler(struct work_struct *work)
 }
 // module init 
 static int __init workq_init(void)
+	if(strncmp(op,"sum",3)==0)
 {
 	pr_info("Workqueue module loaded\n");
 	INIT_WORK(&my_work,my_work_handler);

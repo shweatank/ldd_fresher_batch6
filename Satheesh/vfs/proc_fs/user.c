@@ -5,7 +5,7 @@
 
 int main()
 {
-	int fd=open("/sys/kernel/sysfs_demo/value",O_RDWR);
+	int fd=open("/proc/proc_demo",O_RDWR);
 	if(fd<0)
 	{
 		perror("open");
@@ -25,4 +25,5 @@ int main()
 	lseek(fd,0,SEEK_SET);
 	read(fd,op,sizeof(op));
 	printf("Value: %s\n",op);
+	close(fd);
 }
