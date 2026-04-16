@@ -1,1 +1,0 @@
-savedcmd_/home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/basic_irq.mod := printf '%s\n'   basic_irq.o | awk '!x[$$0]++ { print("/home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/"$$0) }' > /home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/basic_irq.mod

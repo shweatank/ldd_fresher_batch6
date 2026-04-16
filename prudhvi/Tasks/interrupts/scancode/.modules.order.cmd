@@ -1,1 +1,0 @@
-savedcmd_/home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/scancode/modules.order := {   echo /home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/scancode/scan_code1.o; :; } > /home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/scancode/modules.order

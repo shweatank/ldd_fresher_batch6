@@ -1,0 +1,1 @@
+savedcmd_/home/dell/ldd_fresher_batch6/prudhvi/Tasks/file_system/opreation/file_s.mod := printf '%s\n'   file_s.o | awk '!x[$$0]++ { print("/home/dell/ldd_fresher_batch6/prudhvi/Tasks/file_system/opreation/"$$0) }' > /home/dell/ldd_fresher_batch6/prudhvi/Tasks/file_system/opreation/file_s.mod

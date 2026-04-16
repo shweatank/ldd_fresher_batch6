@@ -10,6 +10,7 @@
 
 #define KBD_IRQ 1
 #define KBD_DATA_PORT 0X60
+static struct work_struct my_work;
 static int major;
 static int kernel_add=0;
 static int kernel_mul=0;
@@ -20,8 +21,13 @@ struct num
 };
 
 struct num k;
-static irqreturn_t keyboard_interrupt(int irq,void *dev_id)
+//work handler function
+static void my_work_handler(struct work_struct *work)
 {
+	pr_info("Workqueue : handler started\n");
+
+	//simulate some work (sleep allowed)
+
 	unsigned char scancode;
 
 	scancode =inb(KBD_DATA_PORT);
@@ -42,7 +48,21 @@ static irqreturn_t keyboard_interrupt(int irq,void *dev_id)
 		printk(KERN_INFO"keyboard IRQ:SCAN CODE =0x%x \n",scancode);
 		printk(KERN_INFO"mul=%d \n",kernel_mul);
 	}
+
+	pr_info("workqueue:handler finished\n");
+
+}
+static irqreturn_t keyboard_interrupt(int irq,void *dev_id)
+{
+pr_info("workqueue module loaded\n");
+	//initialize work
+	INIT_WORK(&my_work,my_work_handler);
+
+	//schedule work
+	pr_info("workqueue:scheduling  woek\n");
+	schedule_work(&my_work);
 	return IRQ_HANDLED;
+
 
 }
 static long basic_ioctl(struct file *file ,unsigned int cmd,unsigned long arg)
@@ -104,6 +124,10 @@ static void __exit kbd_driver_exit(void)
 	printk(KERN_INFO"keboard brover unloadded\n");
 	unregister_chrdev(major,DEVICE_NAME);
 	pr_info("basic_ioctl unloaded\n");
+pr_info("Workqueue module exiting\n");
+	//ensure work is completed before exit
+	flush_work(&my_work);
+	pr_info("Workqueue module unloaded\n");
 
 
 }

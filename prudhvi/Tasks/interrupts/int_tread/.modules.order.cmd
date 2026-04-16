@@ -1,1 +1,0 @@
-savedcmd_/home/dell/mirafra/Training/interrupts/int_tread/modules.order := {   echo /home/dell/mirafra/Training/interrupts/int_tread/tread_intr.o; :; } > /home/dell/mirafra/Training/interrupts/int_tread/modules.order

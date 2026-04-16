@@ -1,1 +1,0 @@
-savedcmd_/home/dell/mirafra/Training/ioctl/device_configuration/struct_ioctl.mod := printf '%s\n'   struct_ioctl.o | awk '!x[$$0]++ { print("/home/dell/mirafra/Training/ioctl/device_configuration/"$$0) }' > /home/dell/mirafra/Training/ioctl/device_configuration/struct_ioctl.mod

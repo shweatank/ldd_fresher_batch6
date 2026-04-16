@@ -1,1 +1,0 @@
-savedcmd_/home/dell/mirafra/Training/interrupts/int_tread/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/dell/mirafra/Training/interrupts/int_tread/Module.symvers -T /home/dell/mirafra/Training/interrupts/int_tread/modules.order -i Module.symvers -e 
