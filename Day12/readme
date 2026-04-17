@@ -1,1 +1,9 @@
-
+Problem 1
+Design a kernel module that stores a value using sysfs. When an interrupt occurs,
+update the value using a workqueue and notify waiting processes using a wait queue.
+Problem 2
+Create a system where a user sets a number through sysfs. On interrupt, perform a 
+calculation on that number in a workqueue and wake up any process waiting for the result.
+Problem 3
+Develop a kernel module that reads input from sysfs and updates output only after an 
+interrupt. Use a workqueue for processing and a wait queue for synchronization.
