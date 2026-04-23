@@ -15,7 +15,7 @@ int main() {
         perror("Failed to open device");
         return -1;
     }
-
+    while(1){
     printf("Turning LED ON\n");
     ioctl(fd, LED_ON);
 
@@ -23,7 +23,8 @@ int main() {
 
     printf("Turning LED OFF\n");
     ioctl(fd, LED_OFF);
-
+    sleep(2);
+    }
     close(fd);
     return 0;
 }
