@@ -1,0 +1,109 @@
+									DTS file creation and usage
+									
+		1. DTS file: my_led.dts
+						/dts-v1/;
+			/plugin/;
+
+			/ {
+			    compatible = "brcm,bcm2711";
+
+			    fragment@0 {
+				target-path = "/";
+
+				__overlay__ {
+				    my_led {
+					compatible = "prashant,my-led";
+					gpios = <&gpio 17 0>;
+					status = "okay";
+				    };
+				};
+			    };
+			};
+			
+		2. dtc -@ -I dts -O dtb -o my_led.dtbo my_led.dts
+		3. sudo cp my_led.dtbo /boot/overlays/ 
+		4. sudo nano /boot/config.txt
+		5. dtoverlay=my_led
+		6. sudo reboot
+		7.driver file: 
+			// my_led_driver.c
+
+			#include <linux/module.h>
+			#include <linux/platform_device.h>
+			#include <linux/gpio/consumer.h>
+			#include <linux/of.h>
+			#include <linux/delay.h>
+
+			struct my_led_dev {
+			    struct gpio_desc *gpiod;
+			};
+
+			static int my_led_probe(struct platform_device *pdev)
+			{
+			    struct my_led_dev *led;
+			    int ret;
+
+			    pr_info("my_led: probe called\n");
+
+			    led = devm_kzalloc(&pdev->dev, sizeof(*led), GFP_KERNEL);
+			    if (!led)
+				return -ENOMEM;
+
+			    // Get GPIO from DTS
+			    led->gpiod = devm_gpiod_get(&pdev->dev, NULL, GPIOD_OUT_LOW);
+			    if (IS_ERR(led->gpiod)) {
+				pr_err("Failed to get GPIO\n");
+				return PTR_ERR(led->gpiod);
+			    }
+
+			    platform_set_drvdata(pdev, led);
+
+			    // Simple blink (for demo)
+			    pr_info("my_led: blinking...\n");
+			    for (int i = 0; i < 10; i++) {
+				gpiod_set_value(led->gpiod, 1);
+				msleep(500);
+				gpiod_set_value(led->gpiod, 0);
+				msleep(500);
+			    }
+
+			    pr_info("my_led: probe done\n");
+
+			    return 0;
+				}
+
+				static void my_led_remove(struct platform_device *pdev)
+				{
+				    pr_info("my_led: remove called\n");
+				    return;
+				}
+
+				static const struct of_device_id my_led_of_match[] = {
+				    { .compatible = "prashant,my-led" },
+				    { }
+				};
+				MODULE_DEVICE_TABLE(of, my_led_of_match);
+
+				static struct platform_driver my_led_driver = {
+				    .probe  = my_led_probe,
+				    .remove = my_led_remove,
+				    .driver = {
+					.name           = "my_led_driver",
+					.of_match_table = my_led_of_match,
+				    },
+				};
+
+				module_platform_driver(my_led_driver);
+
+				MODULE_LICENSE("GPL");
+				MODULE_AUTHOR("Prashant");
+				MODULE_DESCRIPTION("Simple GPIO LED Driver (BCM2711)");
+			
+		8. make
+		9. sudo insmod my_led_driver.ko
+		10. dmesg | tail
+		11. this should come on the terminal after dmesg:
+			my_led: probe called
+			my_led: blinking...
+			my_led: probe done
+	
