@@ -85,6 +85,7 @@ static int __init led_init(void) {
         pr_err("LED: Failed to create class\n");
         return PTR_ERR(led_class);
     }
+};
 
     led_device = device_create(led_class, NULL, MKDEV(major, 0), NULL, DEVICE_NAME);
     if (IS_ERR(led_device)) {

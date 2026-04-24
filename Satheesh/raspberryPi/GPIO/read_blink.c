@@ -9,7 +9,11 @@
 #define DEVICE_NAME "led_gpio"
 #define CLASS_NAME "led"
 
+<<<<<<< HEAD
 #define LED (2+512)
+=======
+#define LED (26+512)
+>>>>>>> 6d64dae (ioctl_GPIO)
 
 static int major;
 static struct class* led_class=NULL;
@@ -17,6 +21,10 @@ static struct device* led_device=NULL;
 static ssize_t led_write(struct file*file,const char __user*buffer,size_t len,loff_t *offset)
 {
 	char msg[2];
+<<<<<<< HEAD
+=======
+	
+>>>>>>> 6d64dae (ioctl_GPIO)
 	if(copy_from_user(msg,buffer,len))
 		return -EFAULT;
 	if(msg[0]=='0')
