@@ -1,0 +1,26 @@
+dtc -@ -I dts -O dtb -o my_led.dtbo my_led.dts
+sudo cp my_led.dtbo /boot/overlays/ or /boot/firmware/overlays/
+
+[10:33 am, 23/4/2026] +91 79820 39479: /dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2711";
+
+    fragment@0 {
+        target-path = "/";
+
+        _overlay_ {
+            my_led {
+                compatible = "prashant,my-led";
+                gpios = <&gpio 17 0>;
+                status = "okay";
+            };
+        };
+    };
+};
+[10:34 am, 23/4/2026] +91 79820 39479: dtc -@ -I dts -O dtb -o my_led.dtbo my_led.dts
+sudo cp my_led.dtbo /boot/overlays/ or /boot/firmware/overlays/
+[10:34 am, 23/4/2026] +91 79820 39479: sudo nano /boot/config.txt
+[10:34 am, 23/4/2026] +91 79820 39479: dtoverlay=my_led
+[10:34 am, 23/4/2026] +91 79820 39479: reboot
