@@ -1,10 +1,14 @@
-obj-m += read_gpio.o
+obj-m += read_blink.o
 
-KDIR := /home/mirafra/ldd_fresher_batch6/Satheesh/raspberryPi/linux
-PWD := $(shell pwd)
+KDIR := /home/mirafra/linux
+PWD  := $(shell pwd)
+
+ARCH := arm64
+CROSS_COMPILE := aarch64-linux-gnu-
 
 all:
-	make -C $(KDIR) M=$(PWD) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules
+	$(MAKE) -C $(KDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules
 
 clean:
-	make -C $(KDIR) M=$(PWD) clean
+	$(MAKE) -C $(KDIR) M=$(PWD) clean
+
