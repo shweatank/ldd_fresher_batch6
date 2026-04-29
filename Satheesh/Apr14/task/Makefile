@@ -1,4 +1,4 @@
-obj-m+=mul_thread_tasklet.o
+obj-m+=timer_intr.o
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:

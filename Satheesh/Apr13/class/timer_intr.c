@@ -11,6 +11,11 @@ static void my_timer_callback(struct timer_list *t)
 	printk(KERN_INFO"Timer interrupt occured\n");
 	/*Restart the timer (periodic behaviour)*/
 	mod_timer(&my_timer,jiffies+msecs_to_jiffies(TIMER_INTERVAL_MS));
+	int *ptr=kmalloc(100*sizeof(int),GFP_KERNEL);
+	if(ptr==NULL)
+	{
+		pr_err("KMALLOC:FAiled to allocate memory\n");
+	}
 }
 /* Module initialization*/
 static int __init timer_driver_init(void)
