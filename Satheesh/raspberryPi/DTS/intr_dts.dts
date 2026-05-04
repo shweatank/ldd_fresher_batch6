@@ -1,0 +1,37 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2835";
+
+    fragment@0 {
+        target = <&gpio>;
+        __overlay__ {
+
+            my_pins: my_pins {
+                brcm,pins = <5 10>; // GPIO5 (button), GPIO10 (LED)
+                brcm,function = <0 1>; // 0=input, 1=output
+                brcm,pull = <2 0>; // 2=pull-up, 0=no pull
+            };
+        };
+    };
+
+    fragment@1 {
+        target-path = "/";
+        __overlay__ {
+
+            my_gpio_device {
+                compatible = "mycompany,my-gpio-driver";
+
+                pinctrl-names = "default";
+                pinctrl-0 = <&my_pins>;
+
+                button-gpios = <&gpio 5 1>; // active low
+                led-gpios = <&gpio 10 0>;  // active high
+
+                interrupt-parent = <&gpio>;
+                interrupts = <5 2>; // falling edge
+            };
+        };
+    };
+};

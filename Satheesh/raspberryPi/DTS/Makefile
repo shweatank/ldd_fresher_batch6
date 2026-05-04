@@ -1,4 +1,4 @@
-obj-m += my_led_driver.o
+obj-m += driver_intr.o
 
 
 all:
