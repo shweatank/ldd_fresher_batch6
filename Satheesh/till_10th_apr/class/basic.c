@@ -24,6 +24,7 @@ MODULE_DESCRIPTION("Most basic linux kernel module for education");
 static int __init basic_module_init(void)
 {
         printk(KERN_INFO "Basic kernel module loaded\n");
+	int i=10/0;
         return 0;//returning 0 means suceessfully loaded
 }
 
