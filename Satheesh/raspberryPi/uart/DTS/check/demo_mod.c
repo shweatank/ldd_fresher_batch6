@@ -5,7 +5,7 @@
 #include <linux/interrupt.h>
 #include <linux/platform_device.h>
 #include <linux/of.h>
-
+#include <linux/delay.h>
 #define DR   0x00
 #define FR   0x18
 #define IBRD 0x24
@@ -17,27 +17,21 @@
 #define ICR  0x44
 
 #define FR_RX (1<<4)
-
+#define FR_TX (1<<5)
 static void __iomem *uart_base;
 
 static char buffer[64];
 static int index;
-
+static char tx_buf[]="Hello im in tx buffer\n";
 /* ---------- ISR ---------- */
-static void uart_tx(char ch)
-{
-    /* Wait until TX FIFO is not full */
-    while (readl(uart_base + FR) & (1 << 5))
-        cpu_relax();
-
-    writel(ch, uart_base + DR);
-}
 static irqreturn_t uart_irq_handler(int irq, void *dev_id)
 {
+	pr_info("Hello Im in irq handler\n");
     unsigned int status = readl(uart_base + MIS);
 
     if (status & (1 << 4)) {   // RX interrupt
 
+	pr_info("In rx handler babu\n");
         /* Drain FIFO completely */
         while (!(readl(uart_base + FR) & FR_RX)) {
             char ch = readl(uart_base + DR) & 0xFF;
@@ -52,20 +46,76 @@ static irqreturn_t uart_irq_handler(int irq, void *dev_id)
         pr_info("UART RX: %s\n", buffer);
 
         /* Clear RX interrupt */
-        writel(1 << 4, uart_base + ICR);
-	pr_info("Handler triggered\n");
+        writel((1 << 4)|(1<<6), uart_base + ICR);
     }
+ if (status & (1 << 5))   // TX interrupt
+{
+    static int tx_index = 0;
+    /* Fill TX FIFO until full */
+    while (!(readl(uart_base + FR) & FR_TX))
+    {
+        /* All data sent */
+        if (tx_buf[tx_index] == '\0')
+        {
+            tx_index = 0;
+
+            /* Disable TX interrupt */
+            writel(readl(uart_base + IMSC) & ~(1 << 5),
+                   uart_base + IMSC);
+
+            pr_info("TX completed\n");
+
+            break;
+        }
+
+        /* Put byte into TX FIFO */
+        writel(tx_buf[tx_index++], uart_base + DR);
+    }
+
+    /* Clear TX interrupt */
+    writel((1 << 5), uart_base + ICR);
+}
+
 
     return IRQ_HANDLED;
 }
-static void uart_rx(void)
+
+/*static void check(void)
 {
-while (1) {
-    if (!(readl(uart_base + FR) & (1 << 4))) {
-        char ch = readl(uart_base + DR);
-        pr_info("POLL RX: %c\n", ch);
-    }
+	writel('A',uart_base+DR);
+	char ch=readl(uart_base_DR);
+	if(ch=='A')
+		pr_info("loop back working properly\n");
+	else
+		pr_info("Loopback not working\n");
+}*/
+static void check(void)
+{
+    char ch;
+
+    pr_info("Starting UART polling loopback test\n");
+ char c[]="aaaaaaaaaaaaaaaajjjjjjjjjjjjjjjjsdddddddddddsssssssscccccccccccccccccssssssssssssssssffffffffffffffeeeeeeeeeekkkkkkkkkkkkksdfnskdjfhks";
+char *ptr=c;
+	while(*ptr){
+    /* Wait until TX FIFO has space */
+    while (readl(uart_base + FR) & FR_TX);
+
+    /* Send byte */
+    writel(*ptr++, uart_base + DR);
 }
+    pr_info("Byte transmitted\n");
+
+    /* Wait until RX FIFO gets data */
+//    while (readl(uart_base + FR) & FR_RX);
+
+    /* Read received byte */
+  //  ch = readl(uart_base + DR) & 0xFF;
+
+    //if (ch == 'A')
+      //  pr_info("Loopback working properly\n");
+    //else
+      //  pr_info("Wrong byte received: %c\n", ch);
+
 }
 
 /* ---------- Probe ---------- */
@@ -103,13 +153,17 @@ static int my_probe(struct platform_device *pdev)
 
     writel(0x0, uart_base + CR);     // disable UART
 
-    /* baud rate (example: 9600 for 48MHz clock) */
+    /* baud rate (example: 115200 for 48MHz clock) */
     writel(26, uart_base + IBRD);
     writel(3,  uart_base + FBRD);
 
+
+
     /* 8-bit, FIFO enable */
     writel(0x70, uart_base + LCRH);
-
+unsigned char tmp=readl(uart_base+LCRH);
+	tmp &=~(1<<4);
+	writel(tmp,uart_base+LCRH);
     /* Clear interrupts */
     writel(0x7FF, uart_base + ICR);
 
@@ -119,18 +173,24 @@ static int my_probe(struct platform_device *pdev)
     /* Enable UART, RX, TX */
     writel((1<<0) | (1<<8) | (1<<9), uart_base + CR);
 
-    dev_info(&pdev->dev, "UART initialized, IRQ=%d\n", irq);
-	uart_tx('A');
-	uart_rx();    
-return 0;
+    /* Enable RX TX interrupt */
+    writel((1 << 4)|FR_TX , uart_base + IMSC);
+    
+//	writel(*tx_buf,uart_base+DR);
+	dev_info(&pdev->dev, "UART initialized, IRQ=%d\n", irq);
+	
+	pr_info("Probe execution complete\n");
+	check();
+
+    return 0;
 }
 
 /* ---------- Remove ---------- */
-static int my_remove(struct platform_device *pdev)
+static void my_remove(struct platform_device *pdev)
 {
     writel(0x0, uart_base + CR);
     pr_info("UART driver removed\n");
-    return 0;
+
 }
 
 /* ---------- Device Match ---------- */
@@ -143,7 +203,7 @@ MODULE_DEVICE_TABLE(of, my_of_match);
 /* ---------- Platform Driver ---------- */
 static struct platform_driver my_driver = {
     .probe  = my_probe,
-//    .remove = my_remove,
+    //.remove = my_remove,
     .driver = {
         .name = "my_uart2",
         .of_match_table = my_of_match,
@@ -155,3 +215,4 @@ module_platform_driver(my_driver);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Satheesh");
 MODULE_DESCRIPTION("Simple UART2 Driver with DT + IRQ");
+

@@ -1,4 +1,4 @@
-obj-m+=check.o
+obj-m+=working_display_spi.o
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:

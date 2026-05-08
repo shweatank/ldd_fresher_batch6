@@ -1,0 +1,30 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2711";
+
+    /* Enable UART2 and bind your driver */
+    fragment@0 {
+        target = <&uart2>;
+        __overlay__ {
+            status = "okay";
+            compatible = "my_uart2";
+
+            pinctrl-names = "default";
+            pinctrl-0 = <&uart2_pins>;
+        };
+    };
+
+    /* Configure GPIO pins for UART2 */
+    fragment@1 {
+        target = <&gpio>;
+        __overlay__ {
+            uart2_pins: uart2_pins {
+                brcm,pins = <0 1>;        // GPIO0 (TX), GPIO1 (RX)
+                brcm,function = <4>;      // ALT4 → UART2
+                brcm,pull = <0 2>;        // TX: no pull, RX: pull-up
+            };
+        };
+    };
+};

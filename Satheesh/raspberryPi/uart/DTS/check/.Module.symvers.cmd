@@ -1,0 +1,1 @@
+savedcmd_/home/pi/Satheesh/ldd_fresher_batch6/Satheesh/raspberryPi/uart/DTS/check/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/pi/Satheesh/ldd_fresher_batch6/Satheesh/raspberryPi/uart/DTS/check/Module.symvers -n -T /home/pi/Satheesh/ldd_fresher_batch6/Satheesh/raspberryPi/uart/DTS/check/modules.order -i Module.symvers -e 
