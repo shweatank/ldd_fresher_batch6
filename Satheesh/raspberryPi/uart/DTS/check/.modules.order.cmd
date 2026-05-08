@@ -1,1 +1,0 @@
-savedcmd_/home/pi/Satheesh/ldd_fresher_batch6/Satheesh/raspberryPi/uart/DTS/check/modules.order := {   echo /home/pi/Satheesh/ldd_fresher_batch6/Satheesh/raspberryPi/uart/DTS/check/demo_mod.o; :; } > /home/pi/Satheesh/ldd_fresher_batch6/Satheesh/raspberryPi/uart/DTS/check/modules.order

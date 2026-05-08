@@ -1,1 +1,0 @@
-savedcmd_/home/pi/Satheesh/ldd_fresher_batch6/Satheesh/raspberryPi/uart/DTS/check/demo_mod.mod := printf '%s\n'   demo_mod.o | awk '!x[$$0]++ { print("/home/pi/Satheesh/ldd_fresher_batch6/Satheesh/raspberryPi/uart/DTS/check/"$$0) }' > /home/pi/Satheesh/ldd_fresher_batch6/Satheesh/raspberryPi/uart/DTS/check/demo_mod.mod
