@@ -20,6 +20,7 @@
     fragment@1 {
         target = <&gpio>;
         __overlay__ {
+            status = "okay";
             uart2_pins: uart2_pins {
                 brcm,pins = <0 1>;        // GPIO0 (TX), GPIO1 (RX)
                 brcm,function = <4>;      // ALT4 → UART2

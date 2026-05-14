@@ -52,14 +52,18 @@ static void my_work_handler(struct work_struct *work)
 	gpio_set_value(GPIO_LED,1);
 //	uart_tx_string("\n\rWaiting for data:");
 //	uart_rx_string(string);
-	uart_tx('1');
 //	udelay(100);
 	int i=0;
 	while(i<5){
-	char ch=uart_rx();
-	if(ch=='1')
+	char ch='A'+i;
+	uart_tx(ch);
+	udelay(100);	
+	pr_info("Sent:%c\n",ch);
+	char c=uart_rx();
+	pr_info("Received %c\n",c);
+	if(c=='1')
 		pr_info("Uart loop back is working\n");
-	else if(ch=='0')
+	else if(c=='0')
 		pr_info("Uart received 0\n");
 	i++;
 	}

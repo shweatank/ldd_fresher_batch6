@@ -23,7 +23,7 @@
             uart2_pins: uart2_pins {
                 brcm,pins = <0 1>;        // GPIO0 (TX), GPIO1 (RX)
                 brcm,function = <4>;      // ALT4 → UART2
-                brcm,pull = <0 2>;        // TX: no pull, RX: pull-up
+//                brcm,pull = <0 2>;        // TX: no pull, RX: pull-up
             };
         };
     };
