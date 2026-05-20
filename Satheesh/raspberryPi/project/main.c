@@ -20,9 +20,9 @@
 #define DEVICE_NAME "MONITORING_SYSTEM"
 #define CLASS_NAME "my_class"
 /* For Leds */
-#define LOW (16)
-#define MED (20)
-#define HIGH (21)
+#define LOW (16+512)
+#define MED (20+512)
+#define HIGH (21+512)
 
 
 #define PERI_BASE      0xFE000000UL
@@ -259,19 +259,22 @@ static void timer_callback(struct timer_list *t)
     /* Update PWM duty */
     writel(duty,pwm_base + PWMDAT1);
 	
-gpio_set_value(LOW,0);
-gpio_set_value(MED,0);
-gpio_set_value(HIGH,0);
 
-if(temp < 20)
+if(temp < 20){
     gpio_set_value(LOW,1);
-
-else if(temp <= 50)
+    gpio_set_value(MED,0);
+    gpio_set_value(HIGH,0);
+}
+else if(temp >20 && temp<30){
     gpio_set_value(MED,1);
-
-else
+    gpio_set_value(LOW,0);
+    gpio_set_value(HIGH,0);
+}
+else if(temp >30 ){
     gpio_set_value(HIGH,1);    
-
+    gpio_set_value(LOW,0);
+    gpio_set_value(MED,0);
+}
 //snprintf(log_buffer,sizeof(log_buffer),
       //      "TEMP=%dC ADC=%d DUTY=%d F=%d",
         //    temp,adc,duty,f);
@@ -280,18 +283,7 @@ ktime_get_real_ts64(&ts);
 
 rtc_time64_to_tm(ts.tv_sec, &tm);
 
-snprintf(log_buffer,sizeof(log_buffer),
-"[%04ld-%02d-%02d %02d:%02d:%02d] TEMP=%dC ADC=%d DUTY=%d F=%d",
-tm.tm_year + 1900,
-tm.tm_mon + 1,
-tm.tm_mday,
-tm.tm_hour,
-tm.tm_min,
-tm.tm_sec,
-temp,
-adc,
-duty,
-f);
+snprintf(log_buffer,sizeof(log_buffer),"[%04ld-%02d-%02d %02d:%02d:%02d] TEMP=%dC ADC=%d DUTY=%d F=%d",tm.tm_year + 1900,tm.tm_mon + 1,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec,temp,adc,duty,f);
     data_ready = 1;
 
     /* Schedule workqueue */
@@ -369,9 +361,26 @@ static struct file_operations fops = {
     .write   = my_write,
     .read    = my_read,
 };
-/*static int LED_INIT(void)
+static int LED_INIT(void)
 {
 	int ret;
+	if(!gpio_is_valid(LOW))
+	{
+		pr_err("GPIO %d is invalid\n",LOW);
+		return -ENODEV;
+	}
+	if(!gpio_is_valid(MED))
+	{
+		pr_err("GPIO %d is invalid\n",MED);
+		return -ENODEV;
+	}
+	if(!gpio_is_valid(HIGH))
+	{
+		pr_err("GPIO %d is invalid\n",HIGH);
+		return -ENODEV;
+	}
+
+
 	ret=gpio_request(LOW,"LED1");
 	if(ret){
 		return ret;
@@ -384,12 +393,22 @@ static struct file_operations fops = {
 	if(ret){
 		return ret;
 	}
-	gpio_direction_output(LOW,0);
-	gpio_direction_output(MED,0);
-	gpio_direction_output(HIGH,0);
+	gpio_direction_output(LOW,1);
+	gpio_direction_output(MED,1);
+	gpio_direction_output(HIGH,1);
+
 	pr_info("Alert system initialized succesfully\n");
 	return 0;
-}*/
+}
+static void LED_EXIT(void)
+{
+	gpio_set_value(LOW,0);
+	gpio_set_value(MED,0);
+	gpio_set_value(HIGH,0);
+	gpio_free(LOW);
+	gpio_free(MED);
+	gpio_free(HIGH);
+}
 /* Driver probe */
 static int my_probe(struct platform_device *pdev)
 {
@@ -509,8 +528,8 @@ static int my_probe(struct platform_device *pdev)
     mod_timer(&sample_timer,
               jiffies + msecs_to_jiffies(2000));
 
-	gpio_request(LOW,"LED4");
-	gpio_direction_output(LOW,0);
+
+	LED_INIT();
 	gpio_set_value(LOW,1);
     pr_info("FULL DRIVER LOADED\n");
 
@@ -525,7 +544,7 @@ static void my_remove(struct platform_device *pdev)
     flush_workqueue(my_wq);
 
     destroy_workqueue(my_wq);
-
+	LED_EXIT();
     /* Disable UART */
     writel(0x0,uart_base + CR);
 
