@@ -1,1 +1,0 @@
-savedcmd_/home/dell/ldd_fresher_batch6/prudhvi/Tasks/ioctl/Character_Device_Driver_with_IOCTL/char_drv.mod := printf '%s\n'   char_drv.o | awk '!x[$$0]++ { print("/home/dell/ldd_fresher_batch6/prudhvi/Tasks/ioctl/Character_Device_Driver_with_IOCTL/"$$0) }' > /home/dell/ldd_fresher_batch6/prudhvi/Tasks/ioctl/Character_Device_Driver_with_IOCTL/char_drv.mod

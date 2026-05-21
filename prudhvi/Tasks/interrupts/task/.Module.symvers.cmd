@@ -1,1 +1,0 @@
-savedcmd_/home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/task/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/task/Module.symvers -T /home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/task/modules.order -i Module.symvers -e 

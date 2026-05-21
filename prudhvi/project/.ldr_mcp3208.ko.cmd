@@ -1,0 +1,1 @@
+savedcmd_/home/pi/prudhvi/project/ldr_mcp3208.ko := aarch64-linux-gnu-ld -r -EL  -maarch64elf -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T arch/arm64/module.lds -o /home/pi/prudhvi/project/ldr_mcp3208.ko /home/pi/prudhvi/project/ldr_mcp3208.o /home/pi/prudhvi/project/ldr_mcp3208.mod.o /home/pi/prudhvi/project/.module-common.o

@@ -1,0 +1,21 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2711";
+
+    fragment@0 {
+        target-path = "/";
+
+        __overlay__ {
+            my_gpio_irq_led {
+                compatible = "prashant,my-gpio-irq-led";
+
+                irq-gpios = <&gpio 25 0>;   /* input button */
+                led-gpios = <&gpio 18 0>;   /* LED output */
+
+                status = "okay";
+            };
+        };
+    };
+};

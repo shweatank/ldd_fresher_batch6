@@ -1,1 +1,0 @@
-savedcmd_/home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/task/task1.mod := printf '%s\n'   task1.o | awk '!x[$$0]++ { print("/home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/task/"$$0) }' > /home/dell/ldd_fresher_batch6/prudhvi/Tasks/interrupts/task/task1.mod

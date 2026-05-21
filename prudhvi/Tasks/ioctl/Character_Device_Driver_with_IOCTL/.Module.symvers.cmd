@@ -1,1 +1,0 @@
-savedcmd_/home/dell/ldd_fresher_batch6/prudhvi/Tasks/ioctl/Character_Device_Driver_with_IOCTL/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/dell/ldd_fresher_batch6/prudhvi/Tasks/ioctl/Character_Device_Driver_with_IOCTL/Module.symvers -T /home/dell/ldd_fresher_batch6/prudhvi/Tasks/ioctl/Character_Device_Driver_with_IOCTL/modules.order -i Module.symvers -e 
