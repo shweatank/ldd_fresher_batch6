@@ -265,12 +265,12 @@ if(temp < 20){
     gpio_set_value(MED,0);
     gpio_set_value(HIGH,0);
 }
-else if(temp >20 && temp<30){
+else if(temp < 50){
     gpio_set_value(MED,1);
     gpio_set_value(LOW,0);
     gpio_set_value(HIGH,0);
 }
-else if(temp >30 ){
+else {
     gpio_set_value(HIGH,1);    
     gpio_set_value(LOW,0);
     gpio_set_value(MED,0);
