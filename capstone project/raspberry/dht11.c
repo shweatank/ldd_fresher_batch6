@@ -100,6 +100,8 @@ int dht11_read_data(int *temp, int *hum)
         data[i / 8] <<= 1;
 
         // Long HIGH pulse means bit = 1
+        //High pulse > 40 -> bit = 1;
+        //High pulse < 40 -> bit = 0;
         if (ht > 40)
             data[i / 8] |= 1;
     }
