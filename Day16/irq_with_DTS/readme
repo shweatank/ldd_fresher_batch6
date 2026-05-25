@@ -1,9 +1,0 @@
-dtc -@ -I dts -O dtb -o my_led.dtbo my_led.dts
-
-sudo cp my_led.dtbo /boot/overlays/ or /boot/firmware/overlays/
-
-sudo nano /boot/config.txt
-
-dtoverlay=my_led
-
-reboot
