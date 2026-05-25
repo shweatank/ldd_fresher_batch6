@@ -1,4 +1,4 @@
-```c id="0lfj6j"
+
 #include "u_crc16.h"   // Header file for CRC16 function definitions
 
 
