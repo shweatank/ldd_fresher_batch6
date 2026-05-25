@@ -1,0 +1,10 @@
+/dts-v1/;
+/plugin/;
+
+&{/} {
+    my_led {
+        compatible = "prashant,my-led";
+        gpios = <&gpio 17 0>;
+        status = "okay";
+    };
+};
