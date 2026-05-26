@@ -1,0 +1,1 @@
+savedcmd_/home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/export_receive.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/export_receive.ko /home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/export_receive.o /home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/export_receive.mod.o
