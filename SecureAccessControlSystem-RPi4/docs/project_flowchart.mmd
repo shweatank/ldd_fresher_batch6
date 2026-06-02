@@ -1,0 +1,165 @@
+%% =============================================================================
+%% Secure Access Control System (RPi4) — Project flowcharts
+%% Open each section in https://mermaid.live (copy one diagram at a time if needed)
+%% Black lines/borders: theme + linkStyle below
+%% =============================================================================
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 1 — Full project (horizontal): boot → driver → app → shutdown
+%% -----------------------------------------------------------------------------
+%%{init: {"theme":"base","themeVariables":{"lineColor":"#000000","arrowheadColor":"#000000","primaryBorderColor":"#000000","primaryColor":"#ffffff","clusterBorder":"#000000"}}}%%
+flowchart LR
+  subgraph P1["Phase 1 — Load driver"]
+    direction TB
+    A1([insmod secure_access_core.ko]) --> A2[Platform driver registers<br/>compatible secure,sac-ctrl]
+    A2 --> A3[sac_probe]
+    A3 --> A4[Init locks, wait queue,<br/>tasklet, workqueue]
+    A4 --> A5[GPIO: LEDs, TFT DC/RST/BL]
+    A5 --> A6[SPI bind ILI9225]
+    A6 --> A7{IRQ in device tree?}
+    A7 -->|Yes| A8[Register IRQ handler]
+    A7 -->|No| A9[Use software tasklet only]
+    A8 --> A9
+    A9 --> A10[Create /dev/secure_access0]
+    A10 --> A11[TFT init → SECURE ACCESS READY]
+    A11 --> A12[Register /dev/sac_uart0]
+    A12 --> A13([Driver ready])
+  end
+
+  subgraph P2["Phase 2 — Userspace app"]
+    direction TB
+    B1([Run secure_access_app]) --> B2[ensure_storage on SD<br/>users.db + audit.log]
+    B2 --> B3{Storage OK?}
+    B3 -->|No| B4([Exit error])
+    B3 --> B5[open /dev/secure_access0]
+    B5 --> B6{Open OK?}
+    B6 -->|No| B4
+    B6 --> B7[Menu loop]
+    B7 --> B8{Choice 1–7}
+    B8 -->|1| B9[Login]
+    B8 -->|2| B10[Register]
+    B8 -->|3| B11[Forgot password]
+    B8 -->|4| B12[Delete user]
+    B8 -->|5| B13[Print users]
+    B8 -->|6| B14[Print audit UART]
+    B8 -->|7| B15[Exit]
+    B8 -->|other| B16[Invalid message]
+    B9 --> B7
+    B10 --> B7
+    B11 --> B7
+    B12 --> B7
+    B13 --> B7
+    B14 --> B7
+    B16 --> B7
+    B15 --> B17[ioctl CLEAR_TFT, close]
+    B17 --> B18([App ended])
+  end
+
+  subgraph P3["Phase 3 — Unload"]
+    direction TB
+    C1([rmmod secure_access_core]) --> C2[sac_remove]
+    C2 --> C3[Unregister sac_uart0]
+    C3 --> C4[Stop monitor thread]
+    C4 --> C5[Remove sysfs, tasklet, work]
+    C5 --> C6[Destroy /dev/secure_access0]
+    C6 --> C7[Release SPI]
+    C7 --> C8([Module unloaded])
+  end
+
+  A13 --> B1
+  B18 --> C1
+
+  linkStyle default stroke:#000000,stroke-width:2px
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 2 — One menu action: app + kernel sync (vertical, detail)
+%% Used for login, register steps, admin flows, etc.
+%% -----------------------------------------------------------------------------
+%%{init: {"theme":"base","themeVariables":{"lineColor":"#000000","arrowheadColor":"#000000","primaryBorderColor":"#000000","primaryColor":"#ffffff"}}}%%
+flowchart TB
+  subgraph APP["Userspace — secure_access_app.c"]
+    U1[Read username / password or admin input] --> U2[ioctl SAC_IOC_AUTH_REQUEST<br/>state = WAITING]
+    U2 --> U3[write auth_wait optional<br/>TFT: AUTHENTICATING]
+    U3 --> U4[Logic on SD card<br/>load_user, strcmp hashes,<br/>lock_until, policy]
+    U4 --> U5[ioctl SAC_IOC_AUTH_RESULT<br/>success, state, reason string]
+    U5 --> U6[ioctl SAC_IOC_WAIT_RESULT<br/>block until UI done]
+    U6 --> U7[Back to menu or continue flow]
+  end
+
+  subgraph KERN["Kernel — secure_access_core.ko"]
+    K1[Store auth_res under spinlock] --> K2[sac_fire_simulated_irq]
+    K2 --> K3[Tasklet schedules workqueue]
+    K3 --> K4[sac_auth_work_fn]
+    K4 --> K5{Compare state + reason<br/>strcmp in sac_irq.c}
+    K5 --> K6[sac_tft_print_status<br/>SPI → ILI9225 font pixels]
+    K5 --> K7[sac_leds_result or locked_alert<br/>GPIO blink]
+    K6 --> K8[Set auth_done, wake wait queue]
+    K7 --> K8
+  end
+
+  U5 --> K1
+  K8 --> U6
+
+  linkStyle default stroke:#000000,stroke-width:2px
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 3 — Login decision (userspace only)
+%% -----------------------------------------------------------------------------
+%%{init: {"theme":"base","themeVariables":{"lineColor":"#000000","arrowheadColor":"#000000","primaryBorderColor":"#000000","primaryColor":"#ffffff"}}}%%
+flowchart TB
+  L1([do_login]) --> L2[load_user from users.db]
+  L2 --> L3{User exists?}
+  L3 -->|No| L4[DENIED user not registered]
+  L3 -->|Yes| L5{lock_until > now?}
+  L5 -->|Yes| L6[LOCKED blocked]
+  L5 -->|No| L7[verify_password<br/>SHA-256 salted strcmp]
+  L7 -->|Match| L8[GRANTED reset attempts]
+  L7 -->|Fail| L9[attempts++]
+  L9 --> L10{attempts >= 3?}
+  L10 -->|Yes| L11[LOCKED 60s]
+  L10 -->|No| L12[DENIED bad password]
+  L4 --> L13[send_driver_result + audit_log]
+  L6 --> L13
+  L8 --> L13
+  L11 --> L13
+  L12 --> L13
+  L13 --> L14([Return to menu])
+
+  linkStyle default stroke:#000000,stroke-width:2px
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 4 — Print audit logs (menu 6)
+%% -----------------------------------------------------------------------------
+%%{init: {"theme":"base","themeVariables":{"lineColor":"#000000","arrowheadColor":"#000000","primaryBorderColor":"#000000","primaryColor":"#ffffff"}}}%%
+flowchart LR
+  A1([Menu 6]) --> A2[admin_verify]
+  A2 --> A3{Admin OK?}
+  A3 -->|No| A4([Stop])
+  A3 --> A5[Read audit.log on SD]
+  A5 --> A6[Keep lines last 24 hours]
+  A6 --> A7[Build CRLF buffer]
+  A7 --> A8{Open serial path}
+  A8 --> A9[/dev/sac_uart0 write]
+  A9 --> A10[Kernel forwards to TTY serial0]
+  A10 --> A11[USB-TTL / minicom 9600]
+  A8 --> A12[Fallback direct TTY open]
+  A12 --> A11
+  A11 --> A13[ioctl AUTH_RESULT<br/>audit logs printed]
+  A13 --> A14[TFT: AUDIT LOGS PRINTED]
+  A14 --> A15([Back to menu])
+
+  linkStyle default stroke:#000000,stroke-width:2px
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 5 — Data storage (what persists on SD)
+%% -----------------------------------------------------------------------------
+%%{init: {"theme":"base","themeVariables":{"lineColor":"#000000","arrowheadColor":"#000000","primaryBorderColor":"#000000","primaryColor":"#ffffff"}}}%%
+flowchart LR
+  D1([Event: login, register, etc.]) --> D2[audit_log]
+  D2 --> D3[Rewrite audit.log<br/>keep last 2 days]
+  D3 --> D4[Append line:<br/>time | event | user | status]
+
+  D5([Register / login update]) --> D6[users.db one line per user]
+  D6 --> D7[username | salt | pass_hash |<br/>rec_hash | attempts | lock | admin]
+
+  linkStyle default stroke:#000000,stroke-width:2px

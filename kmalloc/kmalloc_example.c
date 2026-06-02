@@ -3,7 +3,6 @@
 #include<linux/kernel.h>
 #include<linux/slab.h> //kmalloc,kfree
 
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Example");
 MODULE_DESCRIPTION("kmalloc and kfree example");

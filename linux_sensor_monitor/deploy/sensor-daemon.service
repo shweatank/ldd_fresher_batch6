@@ -1,0 +1,13 @@
+[Unit]
+Description=Sensor Monitoring Daemon
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/linux_sensor_monitor/user_space
+ExecStart=/opt/linux_sensor_monitor/user_space/daemon
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

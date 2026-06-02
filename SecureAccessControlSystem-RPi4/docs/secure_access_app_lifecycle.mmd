@@ -1,0 +1,31 @@
+%% Secure Access — overall userspace app lifecycle (secure_access_app.c)
+%% Preview: https://mermaid.live — paste this file or open .mmd where supported
+%%
+%%{init: {"theme":"base","themeVariables":{"lineColor":"#000000","arrowheadColor":"#000000","primaryBorderColor":"#000000","primaryColor":"#ffffff","clusterBorder":"#000000","edgeLabelBackground":"#ffffff"}}}%%
+flowchart TB
+  A([Start]) --> B[ensure_storage — SD paths, users.db, audit.log]
+  B --> C{OK?}
+  C -->|No| X([Exit — storage error])
+  C -->|Yes| D[open /dev/secure_access0]
+  D --> E{Opened?}
+  E -->|No| Y([Exit — driver missing])
+  E -->|Yes| F[Menu loop — choices 1–7]
+  F --> G{User choice}
+  G -->|1| H[Login]
+  G -->|2| I[Register]
+  G -->|3| J[Forgot password]
+  G -->|4| K[Delete user]
+  G -->|5| L[Print users]
+  G -->|6| M[Print audit logs — UART]
+  G -->|7| N[Clear TFT, close, exit]
+  G -->|other| O[Invalid choice]
+  H --> F
+  I --> F
+  J --> F
+  K --> F
+  L --> F
+  M --> F
+  O --> F
+  N --> Z([End])
+
+  linkStyle default stroke:#000000,stroke-width:2px

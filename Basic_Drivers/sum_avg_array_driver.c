@@ -8,7 +8,7 @@
 #define DEVICE_NAME "sum_avg_array"
 #define IOCTL_MAGIC 'B'
 #define IOCTL_SEND_ARRAY  _IOW(IOCTL_MAGIC, 1, int)
-#define IOCTL_RECEIVE     _IOR(IOCTL_MAGIC, 2, int)
+#define IOCTL_RECEIVE     _IOR(IOCTL_MAGIC, 2, float)
  
 static int major;
 static float arr[2];
@@ -27,9 +27,6 @@ static long basic_ioctl(struct file *file,
                  return -EFAULT;
  
              pr_info("kernel: received %d from user\n", user_value);
- 
-             /* kernel modifies data */
-             kernel_value = user_value * 10;
  
              /* copy data back to user */
              if (copy_to_user((int __user *)arg, &kernel_value, sizeof(int)))

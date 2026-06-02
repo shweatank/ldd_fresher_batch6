@@ -8,7 +8,7 @@
  
 #define IOCTL_MAGIC 'B'
 #define IOCTL_SEND_ARRAY _IOW(IOCTL_MAGIC, 1, int)
-#define IOCTL_RECEIVE    _IOR(IOCTL_MAGIC, 2, int)
+#define IOCTL_RECEIVE    _IOR(IOCTL_MAGIC, 2, float)
 
 
 
@@ -16,6 +16,7 @@ int main(void)
 {
      int fd;
      int arr[100];
+     float res[2];
      printf("Enter Array Elements :");
      for(int i=0;i<100;i++)
      {
@@ -28,7 +29,8 @@ int main(void)
      }  
      printf("User: sending %d to kernel\n",arr);
      ioctl(fd, IOCTL_SET_VALUE, arr);
-     printf("User: got back %d from kernel\n", value);
+     ioctl(fd,IOCTL_RECEIVE,res);
+     printf("User: got back sum=%f from kernel\n", value);
 
  
      close(fd);

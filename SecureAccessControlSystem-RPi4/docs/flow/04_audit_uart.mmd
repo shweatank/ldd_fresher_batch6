@@ -1,0 +1,14 @@
+%% Diagram 4 — Print audit logs menu 6
+%%{init: {"theme":"base","themeVariables":{"lineColor":"#000000","arrowheadColor":"#000000","primaryBorderColor":"#000000","primaryColor":"#ffffff"}}}%%
+flowchart LR
+  A1([Menu 6]) --> A2[admin_verify]
+  A2 --> A3{Admin OK?}
+  A3 -->|No| A4([Stop])
+  A3 --> A5[audit.log last 24h filter]
+  A5 --> A6[CRLF buffer]
+  A6 --> A7[Write /dev/uart or TTY fallback]
+  A7 --> A8[Serial to PC minicom]
+  A8 --> A9[TFT AUDIT LOGS PRINTED]
+  A9 --> A10([Menu])
+
+  linkStyle default stroke:#000000,stroke-width:2px

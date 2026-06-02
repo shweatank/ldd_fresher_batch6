@@ -1,0 +1,16 @@
+%% See docs/project_flowchart.mmd for the full project flow (5 diagrams).
+%% This file: quick horizontal overview only.
+%%
+%%{init: {"theme":"base","themeVariables":{"lineColor":"#000000","arrowheadColor":"#000000","primaryBorderColor":"#000000","primaryColor":"#ffffff"}}}%%
+flowchart LR
+  A([insmod]) --> B[sac_probe GPIO SPI IRQ cdev TFT uart]
+  B --> C([Driver ready])
+  C --> D([secure_access_app])
+  D --> E[SD users.db audit.log]
+  E --> F[Menu 1-7 ioctl TFT LED]
+  F --> G{Exit?}
+  G -->|No| F
+  G -->|Yes| H([rmmod sac_remove])
+  H --> I([End])
+
+  linkStyle default stroke:#000000,stroke-width:2px
