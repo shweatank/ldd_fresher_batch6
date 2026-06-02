@@ -278,41 +278,39 @@ static int mcp3208_read_channel(u8 channel)
 static void my_work_handler(struct work_struct *work)
 {
     int adc_ldr = mcp3208_read_channel(0);
-    int adc_temp = mcp3208_read_channel(1);
     int ret;
 
-    if (adc_ldr < 0 || adc_temp < 0)
-        return;
 
-    pr_info("LDR ADC Value = %d   Temperature ADC Value = %d\n",
-            adc_ldr, adc_temp);
 
     /* LED control */
     if (led_gpio_requested) {
         if ((adc_ldr <= 100) && !flag) {
             gpio_set_value(GPIO_LED, 1);
             pr_info("LED: ON\n");
-            flag = 1;
-        } else if ((adc_ldr > 100) && (adc_ldr < 4096) && flag) {
-            gpio_set_value(GPIO_LED, 0);
-            pr_info("LED: OFF\n");
-            flag = 0;
-        }
+	    flag = 1;
+	} else if ((adc_ldr > 100) && (adc_ldr < 4096) && flag) {
+		gpio_set_value(GPIO_LED, 0);
+		pr_info("LED: OFF\n");
+		flag = 0;
+	}
     }
-
+    if(adc_ldr<100){
+	    pr_info("LDR ADC Value = %d  LED=ON\n",adc_ldr);
+}
+    else{
+	    pr_info("LDR ADC Value = %d  LED=OFF\n",adc_ldr);
+}
     /* Send values over UART */
-    ret = snprintf(buffer, sizeof(buffer), "%d %d", adc_ldr, adc_temp);
+    ret = snprintf(buffer, sizeof(buffer), "%d", adc_ldr);
     uart_send_string(buffer);
 
     /* Display on LCD */
     char buf1[40], buf2[40];
     int ldr = (adc_ldr * 100) / 4095;          // Scale to 0-100
-    int temp_scaled = (adc_temp *300) / 4095; // Scale to 0-33.0C
-    int temp_int = temp_scaled ;
    
 
     snprintf(buf1, sizeof(buf1), "LIGHT=%d%%", ldr);
-    snprintf(buf2, sizeof(buf2), "TEMP=%dC", temp_int);
+    snprintf(buf2, sizeof(buf2), "ADC=%d", adc_ldr);
 
     lcd_clear();
     lcd_cmd(0x84);
