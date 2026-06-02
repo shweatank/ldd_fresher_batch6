@@ -1,12 +1,6 @@
 obj-m += rtc_project.o
 
-rtc_project-objs := \
-main.o \
-gpio.o \
-uart.o \
-lcd.o \
-rtc.o \
-spi_adc.o
+rtc_project-objs := main.o gpio.o uart.o lcd.o rtc.o spi_adc.o
 
 KDIR := /lib/modules/$(shell uname -r)/build
 

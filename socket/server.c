@@ -61,13 +61,13 @@ int main()
 	tty.c_cflag &= ~CSTOPB;
 
 	/* Configure UART in raw mode */
-	tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+	tty.c_lflag = 0;
 
 	/* Disable software flow control */
-	tty.c_iflag &= ~(IXON | IXOFF | IXANY);
+	tty.c_iflag = 0;
 
 	/* Disable output processing */
-	tty.c_oflag &= ~OPOST;
+	tty.c_oflag = 0;
 
 	/* Apply UART settings immediately */
 	tcsetattr(uart_fd, TCSANOW, &tty);
