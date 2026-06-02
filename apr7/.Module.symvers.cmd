@@ -1,0 +1,1 @@
+savedcmd_/home/mirafra/ldd_fresher_batch6/apr7/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/mirafra/ldd_fresher_batch6/apr7/Module.symvers -T /home/mirafra/ldd_fresher_batch6/apr7/modules.order -i Module.symvers -e 
