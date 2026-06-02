@@ -1,31 +1,34 @@
 CC = gcc
+CFLAGS = -Wall -pthread
 
-TARGET_SERVER = ems_server
-TARGET_CLIENT = ems_client
+all: ems_server ems_client
 
-BUILD_DIR = build
-CFLAGS = -Wall -Wextra -pthread -g
+ems_server: ems_server.o uart.o uart_processor.o network_socket.o crc16.o dashboard.o
+$(CC) $(CFLAGS) ems_server.o uart.o uart_processor.o network_socket.o crc16.o dashboard.o -o ems_server
 
-SERVER_SRC = ems_server.c uart.c uart_processor.c network_socket.c crc16.c dashboard.c
-CLIENT_SRC = ems_client.c network_socket.c
+ems_client: ems_client.o network_socket.o
+$(CC) $(CFLAGS) ems_client.o network_socket.o -o ems_client
 
-SERVER_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SERVER_SRC))
-CLIENT_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(CLIENT_SRC))
+ems_server.o: ems_server.c
+$(CC) $(CFLAGS) -c ems_server.c
 
-all: directories $(TARGET_SERVER) $(TARGET_CLIENT)
+uart.o: uart.c
+$(CC) $(CFLAGS) -c uart.c
 
-directories:
-	@mkdir -p $(BUILD_DIR)
-	@mkdir -p logs
+uart_processor.o: uart_processor.c
+$(CC) $(CFLAGS) -c uart_processor.c
 
-$(TARGET_SERVER): $(SERVER_OBJ)
-	$(CC) $(CFLAGS) $^ -o $@
+network_socket.o: network_socket.c
+$(CC) $(CFLAGS) -c network_socket.c
 
-$(TARGET_CLIENT): $(CLIENT_OBJ)
-	$(CC) $(CFLAGS) $^ -o $@
+crc16.o: crc16.c
+$(CC) $(CFLAGS) -c crc16.c
 
-$(BUILD_DIR)/%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+dashboard.o: dashboard.c
+$(CC) $(CFLAGS) -c dashboard.c
+
+ems_client.o: ems_client.c
+$(CC) $(CFLAGS) -c ems_client.c
 
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET_SERVER) $(TARGET_CLIENT)
+rm -f *.o ems_server ems_client
