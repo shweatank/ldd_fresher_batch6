@@ -1,1 +1,0 @@
-savedcmd_/home/mirafra/ldd_fresher_batch6/apr7/ldd1.ko := aarch64-linux-gnu-ld -r -EL  -maarch64elf -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T scripts/module.lds -o /home/mirafra/ldd_fresher_batch6/apr7/ldd1.ko /home/mirafra/ldd_fresher_batch6/apr7/ldd1.o /home/mirafra/ldd_fresher_batch6/apr7/ldd1.mod.o /home/mirafra/ldd_fresher_batch6/apr7/.module-common.o

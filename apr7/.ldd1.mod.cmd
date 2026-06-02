@@ -1,1 +1,0 @@
-savedcmd_/home/mirafra/ldd_fresher_batch6/apr7/ldd1.mod := printf '%s\n'   ldd1.o | awk '!x[$$0]++ { print("/home/mirafra/ldd_fresher_batch6/apr7/"$$0) }' > /home/mirafra/ldd_fresher_batch6/apr7/ldd1.mod
