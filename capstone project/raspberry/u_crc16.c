@@ -1,14 +1,5 @@
 
 #include "u_crc16.h"   // Header file for CRC16 function definitions
-
-
-/* ---------------- CRC16 CHECKSUM FUNCTION ---------------- */
-
-/*
- * Compute CRC16 checksum for given data buffer
- * data -> pointer to input data
- * len  -> number of bytes in data buffer
- */
 uint16_t crc16_compute(uint8_t *data, size_t len)
 {
         // Initialize CRC with standard starting value
