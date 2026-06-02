@@ -1,0 +1,67 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+
+    compatible = "brcm,bcm2711";
+
+    /* ----------------------------- */
+    /* I2C DS3231 */
+    /* ----------------------------- */
+
+    fragment@0 {
+
+        target = <&i2c1>;
+
+        __overlay__ {
+
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            status = "okay";
+
+            ds3231@68 {
+
+                compatible = "maxim,ds3231-custom";
+
+                reg = <0x68>;
+
+                status = "okay";
+
+                /* PWM0 Channel 0 */
+
+                pwms = <&pwm 0 500000 0>;
+
+                pwm-names = "led_pwm";
+            };
+        };
+    };
+
+    /* ----------------------------- */
+    /* UART0 */
+    /* ----------------------------- */
+
+    fragment@1 {
+
+        target = <&uart0>;
+
+        __overlay__ {
+
+            status = "okay";
+        };
+    };
+
+    /* ----------------------------- */
+    /* PWM Enable */
+    /* ----------------------------- */
+
+    fragment@2 {
+
+        target = <&pwm>;
+
+        __overlay__ {
+
+            status = "okay";
+        };
+    };
+};
