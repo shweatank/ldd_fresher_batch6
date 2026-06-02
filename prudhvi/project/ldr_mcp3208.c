@@ -85,6 +85,15 @@ static bool led_gpio_requested = false; // Track if LED GPIO request succeeded
 #define D6 24
 #define D7 25
 
+/* ---------- SPI GPIO PINS ---------- */
+
+/*
+MOSI → GPIO10
+MISO → GPIO9
+SCLK → GPIO11
+CS → GPIO8
+
+*/
 /* ---------- Device Config ---------- */
 #define DEVICE_NAME "ldr_adc"
 #define TIMER_INTERVAL_MS 1000 // Timer interval in ms
@@ -217,7 +226,7 @@ static void uart_init(void)
     writel(312, uart_base + UART_IBRD);    // Integer baud rate
     writel(32, uart_base + UART_FBRD);     // Fractional baud rate
     writel((3 << 5), uart_base + UART_LCRH); // 8-bit, no parity, 1 stop
-    writel(UARTEN | TXE | RXE, uart_base + UART_CR); // Enable UART
+    writel(UARTEN | TXE , uart_base + UART_CR); // Enable UART
     pr_info("UART initialized\n");
 }
 
@@ -422,3 +431,4 @@ static struct spi_driver ldr_driver = {
 
 /*------------ Register SPI Driver------------------ */
 module_spi_driver(ldr_driver);
+
