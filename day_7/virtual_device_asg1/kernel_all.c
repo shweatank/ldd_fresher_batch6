@@ -1,0 +1,119 @@
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/fs.h>
+#include <linux/uaccess.h>
+#include <linux/wait.h>
+#include <linux/hrtimer.h>
+#include <linux/ktime.h>
+#include <linux/string.h>
+#include <linux/init.h>
+#include <linux/interrupt.h>
+
+
+#define DEVICE_NAME "waitq_basic"
+#define BUF_SIZE 256
+
+static int major_number;
+static wait_queue_head_t wq;
+static int flag=0;
+
+static char kernel_buffer[BUF_SIZE];
+static int buffer_size;
+
+static int basic_open(struct inode *inode,struct file *file)
+{
+
+        printk(KERN_INFO "virtual device:device opened\n");
+        return 0;
+}
+
+static ssize_t my_read(struct file *file, char __user*buf,size_t len,loff_t *off)
+{
+//        char msg[]="hello from kernel\n";
+        pr_info("Read : waiting..\n");
+        wait_event_interruptible(wq, flag !=0);
+        flag=0;
+        kernel_buffer[(strlen(kernel_buffer))]='\0';
+        copy_to_user(buf,kernel_buffer,sizeof(kernel_buffer));
+        kernel_buffer[0]='\0';
+        pr_info("read : done\n");
+//      buf[strlen(buf)
+        return 0;
+}
+
+static ssize_t basic_write(struct file *file,const char __user *user_buffer,
+                        size_t count,loff_t *offset)
+{
+        int bytes_to_copy;
+        bytes_to_copy=min(count,(size_t)BUF_SIZE);
+        //copy the data from user space to kernal space
+        if(copy_from_user(kernel_buffer,user_buffer,bytes_to_copy))
+                return -EFAULT;
+
+        buffer_size=bytes_to_copy;
+     //   sscanf(user_buffer,"%d,%d",&val1,&val2);
+        flag = 1;
+        wake_up_interruptible(&wq);
+
+        printk(KERN_INFO "basic_char: wrote %d bytes\n",bytes_to_copy);
+        return bytes_to_copy;
+}
+
+
+static int __init my_init(void)
+{
+        pr_info("driver loaded\n");
+        init_waitqueue_head(&wq);
+        //register device
+//        major = register_chrdev(0,DEVICE_NAME, &fops);
+
+	ret=request_irq(IRQ_NUM,irq_demo_isr,
+                IRQF_SHARED,DRIVER_NAME,
+                (void*)irq_demo_isr);
+
+	if(ret){
+	pr_err("%s : failed to request IRQ %d\n",DRIVER_NAME,IRQ_NUM);
+	return ret;
+	}
+	pr_info("%s: IRQ %d registered successfully\n",
+        DRIVER_NAME, IRQ_NUM);
+	
+	timer_setup(&my_timer, my_timer_callback,0);
+        //start timer
+        mod_timer(&my_timer, jiffies + msecs_to_jiffies(TIMER_INTERVAL_MS));
+
+
+         major_number = register_chrdev(0, DEVICE_NAME, &fops);
+        if(major_number < 0)
+        {
+                printk(KERN_ERR "basic_char: failed to register device\n");
+                return major_number;
+
+        }
+
+        printk(KERN_INFO "basic_char:loaded\n");
+        printk(KERN_INFO "basic_char: major number =%d\n",major_number);
+        printk(KERN_INFO "create device node with :\n");
+        printk(KERN_INFO "mknod /dev/%s c %d 0\n",DEVICE_NAME, major_number);
+
+        return 0;
+}
+
+
+
+static void __exit my_exit(void)
+{
+        pr_info("driver unloaded\n");
+
+      //  hrtimer_cancel(&my_timer);
+
+        unregister_chrdev(major_number,DEVICE_NAME);
+}
+
+module_init(my_init);
+module_exit(my_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Pavan");
+MODULE_DESCRIPTION("this program is about to know the how wait_queue is works");
+
