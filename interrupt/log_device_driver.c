@@ -1,0 +1,193 @@
+/*Deferred Logging System
+Create a driver for logging messages from user space.
+User writes log messages
+A software interrupt is triggered
+ISR defers work to a workqueue for formatting and storing logs
+A kernel thread periodically flushes logs
+read() waits using a waitqueue for new logs*/
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/init.h>
+#include <linux/fs.h>
+#include <linux/uaccess.h>
+#include <linux/hrtimer.h>
+#include <linux/ktime.h>
+#include <linux/workqueue.h>
+#include <linux/wait.h>
+#include <linux/kthread.h>
+#include <linux/delay.h>
+#include <linux/string.h>
+
+#define DEVICE_NAME "driver"
+#define BUF_SIZE 256
+
+static int major_number;
+static char kernel_buffer[BUF_SIZE];
+static int buffer_size;
+//static char log_buffer[BUF_SIZE];
+//static int log_size;
+
+static wait_queue_head_t wq;
+static int data_ready = 0;
+
+// Timer
+static struct hrtimer my_timer;
+static ktime_t interval;
+//static int  count =0;
+// Workqueue 
+static struct work_struct my_work;
+
+// Kernel thread 
+static struct task_struct *my_thread;
+
+
+static void my_work_handler(struct work_struct *work)
+{
+	pr_info("Workqueue: started processing\n");
+
+	msleep(1000); 
+	//count++;
+	//snprintf(kernel_buffer, BUF_SIZE, "Count = %d\n",count);
+	//buffer_size = strlen(kernel_buffer);
+
+	data_ready = 1;
+
+	pr_info("Workqueue: data generated\n");
+
+	wake_up_interruptible(&wq);
+
+
+	pr_info("Workqueue: finished\n");
+}
+
+
+static enum hrtimer_restart timer_callback(struct hrtimer *t)
+{
+	pr_info("Timer fired \n");
+
+	//goes to my work handler
+	schedule_work(&my_work);
+
+	return HRTIMER_NORESTART;
+}
+
+
+static int thread_fn(void *data)
+{
+	//static int i =0;
+	printk(KERN_INFO " %s\n",kernel_buffer);
+	return 0;
+}
+
+
+static int basic_open(struct inode *inode, struct file *file)
+{
+	printk(KERN_INFO "device opened\n");
+	return 0;
+}
+
+static int basic_release(struct inode *inode, struct file *file)
+{
+	printk(KERN_INFO "device closed\n");
+	return 0;
+}
+
+
+static ssize_t basic_read(struct file *file, char __user *user_buffer,size_t count, loff_t *offset)
+{
+	int bytes_to_copy;
+
+
+	wait_event_interruptible(wq, data_ready == 1);
+
+	
+
+	bytes_to_copy = min(count, (size_t)buffer_size);
+
+	if (copy_to_user(user_buffer, kernel_buffer, bytes_to_copy))
+		return -EFAULT;
+
+//	printk(KERN_INFO "read %d bytes %s\n", bytes_to_copy,kernel_buffer);
+	data_ready = 0;
+	return bytes_to_copy;
+}
+
+
+static ssize_t basic_write(struct file *file,const char __user *user_buffer,size_t count, loff_t *offset)
+{
+	int bytes_to_copy;
+
+	bytes_to_copy = min(count, (size_t)(BUF_SIZE - 1));
+
+	if (copy_from_user(kernel_buffer, user_buffer, bytes_to_copy))
+		return -EFAULT;
+
+	kernel_buffer[bytes_to_copy] = '\0';
+	buffer_size = bytes_to_copy;
+
+
+	hrtimer_start(&my_timer, interval, HRTIMER_MODE_REL);
+	
+	printk(KERN_INFO "wrote %d bytes\n", bytes_to_copy);
+
+	return bytes_to_copy;
+}
+
+
+static struct file_operations basic_fops = {
+	.owner = THIS_MODULE,
+	.open = basic_open,
+	.read = basic_read,
+	.write = basic_write,
+	.release = basic_release,
+};
+
+
+static int __init basic_char_init(void)
+{
+	major_number = register_chrdev(0, DEVICE_NAME, &basic_fops);
+
+	if (major_number < 0)
+	{
+		printk(KERN_ERR "failed to register device\n");
+		return major_number;
+	}
+
+	init_waitqueue_head(&wq);
+
+	interval = ktime_set(1, 0); // 1 sec
+
+	hrtimer_setup(&my_timer, timer_callback, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+
+	INIT_WORK(&my_work, my_work_handler);
+
+	my_thread = kthread_run(thread_fn, NULL, "my_kthread");
+
+	printk(KERN_INFO "driver loaded\n");
+	printk(KERN_INFO "major number = %d\n", major_number);
+	printk(KERN_INFO "mknod /dev/%s c %d 0\n", DEVICE_NAME, major_number);
+
+	return 0;
+}
+
+
+static void __exit basic_char_exit(void)
+{
+	hrtimer_cancel(&my_timer);
+	flush_work(&my_work);
+
+
+	if (my_thread)
+		kthread_stop(my_thread);
+
+	unregister_chrdev(major_number, DEVICE_NAME);
+
+	printk(KERN_INFO "driver unloaded\n");
+}
+
+module_init(basic_char_init);
+module_exit(basic_char_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Gangadhar");
+MODULE_DESCRIPTION("Virtual device driver with interrupt simulation, waitqueue, workqueue, and kthread");
