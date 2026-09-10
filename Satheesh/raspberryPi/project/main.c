@@ -31,7 +31,7 @@
 #define PWM_BASE       0xFE20C000
 #define PWMCLK_BASE    0xFE1010A0
 
-/* PWM Registers */
+/* PWM isters */
 #define PWMCTL         0x00
 #define PWMRNG1        0x10
 #define PWMDAT1        0x14
@@ -203,7 +203,6 @@ static int mcp3208_read_channel(u8 channel)
     spi_write(SPI_CS,spi_read(SPI_CS) | SPI_CS_TA);
 
     spi_transfer_byte(0x06 | ((channel & 0x04) >> 2));
-
     rx2 = spi_transfer_byte((channel & 0x03) << 6);
 
     rx3 = spi_transfer_byte(0x00);
@@ -305,8 +304,8 @@ static int my_release(struct inode *inode,struct file *file)
     return 0;
 }
 
-/* Write from user space */
-static ssize_t my_write(struct file *file,const char __user *buf,
+
+/*static ssize_t my_write(struct file *file,const char __user *buf,
                         size_t len,loff_t *offset)
 {
     char kbuf[16];
@@ -329,13 +328,15 @@ static ssize_t my_write(struct file *file,const char __user *buf,
     if(value > 100)
         value = 100;
 
-    /* Convert percentage to PWM */
+    Convert percentage to PWM 
     duty = (value * 1024) / 100;
 
     writel(duty,pwm_base + PWMDAT1);
 
     return len;
 }
+*/
+
 
 /* Read logs from driver */
 static ssize_t my_read(struct file *file,char __user *buf,
@@ -358,10 +359,10 @@ static struct file_operations fops = {
     .owner   = THIS_MODULE,
     .open    = my_open,
     .release = my_release,
-    .write   = my_write,
+    //.write   = my_write,
     .read    = my_read,
 };
-static int LED_INIT(void)
+static int ALERT_SYS_INIT(void)
 {
 	int ret;
 	if(!gpio_is_valid(LOW))
@@ -400,7 +401,7 @@ static int LED_INIT(void)
 	pr_info("Alert system initialized succesfully\n");
 	return 0;
 }
-static void LED_EXIT(void)
+static void ALERT_SYS_EXIT(void)
 {
 	gpio_set_value(LOW,0);
 	gpio_set_value(MED,0);
@@ -529,7 +530,7 @@ static int my_probe(struct platform_device *pdev)
               jiffies + msecs_to_jiffies(2000));
 
 
-	LED_INIT();
+	ALERT_SYS_INIT();
 	gpio_set_value(LOW,1);
     pr_info("FULL DRIVER LOADED\n");
 
@@ -537,14 +538,14 @@ static int my_probe(struct platform_device *pdev)
 }
 
 /* Driver remove */
-static void my_remove(struct platform_device *pdev)
+static int my_remove(struct platform_device *pdev)
 {
     del_timer_sync(&sample_timer);
 
     flush_workqueue(my_wq);
 
     destroy_workqueue(my_wq);
-	LED_EXIT();
+	ALERT_SYS_EXIT();
     /* Disable UART */
     writel(0x0,uart_base + CR);
 
@@ -568,6 +569,7 @@ static void my_remove(struct platform_device *pdev)
     iounmap(pwm_base);
 
     pr_info("DRIVER REMOVED\n");
+return 0;
 }
 
 /* Device tree match table */
@@ -592,4 +594,4 @@ module_platform_driver(my_driver);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Satheesh Charan");
-MODULE_DESCRIPTION("Smart automated industrial monitoring system");
+MODULE_DESCRIPTION("Smart automated Temperature monitoring and Controlling system");

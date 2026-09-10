@@ -1,3 +1,9 @@
+
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
 #include<linux/module.h> //core module access
 #include<linux/kernel.h> //printk()
 #include<linux/init.h> //__init,__exit

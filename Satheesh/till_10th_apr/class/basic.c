@@ -4,15 +4,14 @@
 */
 
 
-
 #include<linux/module.h>//required for all kernel modules
 #include<linux/kernel.h>//reqired for printk()
 #include<linux/init.h>//required for __init nad __exit macros
 
-MODULE_LICENSE("GPL"); //PREVENTS KERNEL TAINT
+MODULE_LICENSE("GPL v2"); //PREVENTS KERNEL TAINT
 MODULE_AUTHOR("prashant");
 MODULE_DESCRIPTION("Most basic linux kernel module for education");
-
+int *ptr=NULL;
 
 /*
   init tells the kernel:
@@ -26,6 +25,7 @@ static int __init basic_module_init(void)
         printk(KERN_INFO "Basic kernel module loaded\n");
 	int i=10/0;
         return 0;//returning 0 means suceessfully loaded
+	ptr=kmalloc((2*1024*1024)*sizeof(int),GFP_KERNEL);
 }
 
 /*
@@ -36,6 +36,7 @@ static int __init basic_module_init(void)
 static void __exit basic_module_exit(void)
 {
         printk(KERN_INFO "Basic kernel module unloaded\n");
+	kfree(ptr);
 }
 /*
    these macros tell the kernel which functions

@@ -146,10 +146,12 @@ return 0;
 }
 
 /* ---------- Remove ---------- */
-static void my_remove(struct platform_device *pdev)
+static int  my_remove(struct platform_device *pdev)
 {
     writel(0x0, uart_base + CR);
+
     pr_info("UART driver removed\n");
+	return 0;
 }
 
 /* ---------- Device Match ---------- */

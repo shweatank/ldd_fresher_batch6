@@ -4,6 +4,7 @@
 #include<linux/interrupt.h>
 #include<linux/io.h>
 #include<linux/uaccess.h>
+#include<linux/delay.h>
 struct two
 {
 	int a,b;
@@ -29,6 +30,7 @@ static  irqreturn_t keyboard_interrupt(int irq,void *dev_id)
 	//read scan code from keyboard port 
 	scancode=inb(KBD_DATA_PORT);
 	//printk(KERN_INFO"KEyboard IRQ:scan code=0x%x\n",scancode);
+	msleep(1);
 	switch (scancode)
 	{
 		case 0x9e:

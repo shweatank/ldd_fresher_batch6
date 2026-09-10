@@ -54,8 +54,8 @@ int main(void)
 
     tcgetattr(uart_fd,&options);
 
-    cfsetispeed(&options,B9600);
-    cfsetospeed(&options,B9600);
+    cfsetispeed(&options,B115200);
+    cfsetospeed(&options,B115200);
 
     options.c_cflag |= (CLOCAL | CREAD);
 

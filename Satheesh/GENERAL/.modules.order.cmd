@@ -1,1 +1,0 @@
-savedcmd_/home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/modules.order := {   echo /home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/export_receive.o;   echo /home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/export_send.o; :; } > /home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/modules.order

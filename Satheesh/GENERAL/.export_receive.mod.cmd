@@ -1,1 +1,0 @@
-savedcmd_/home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/export_receive.mod := printf '%s\n'   export_receive.o | awk '!x[$$0]++ { print("/home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/"$$0) }' > /home/mirafra/ldd_fresher_batch6/Satheesh/GENERAL/export_receive.mod
